@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mark Attendance</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Active Form -->
+    <div class="card" id="formCard">
+      <h1>📋 Mark Your Attendance</h1>
+      <div id="sessionDetails" class="session-info"></div>
+      <div id="countdown" class="timer"></div>
+
+      <input 
+        type="text" 
+        id="studentName" 
+        placeholder="Enter Your Full Name"
+        maxlength="60"
+      />
+      <button onclick="submitAttendance()">✅ Submit Attendance</button>
+      <p id="formError" class="error"></p>
+    </div>
+
+    <!-- Success Message -->
+    <div class="card hidden" id="successCard">
+      <div class="success-icon">✅</div>
+      <h2>Attendance Marked!</h2>
+      <p id="successName"></p>
+      <p class="muted">You can close this page now.</p>
+    </div>
+
+    <!-- Closed Message -->
+    <div class="card hidden" id="closedCard">
+      <div class="error-icon">⛔</div>
+      <h2>Session Closed</h2>
+      <p>This attendance session is no longer active.</p>
+    </div>
+
+    <!-- Not Found -->
+    <div class="card hidden" id="notFoundCard">
+      <div class="error-icon">❓</div>
+      <h2>Invalid Link</h2>
+      <p>This attendance link is not valid.</p>
+    </div>
+
+  </div>
+
+  <script type="module" src="student.js"></script>
+</body>
+</html>
