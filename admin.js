@@ -20,16 +20,15 @@ import {
 let currentSessionId = null;
 let countdownInterval = null;
 
-// ─── GET REPO NAME AUTOMATICALLY ─────────────────────
+// ─── GET BASE URL ─────────────────────────────────────
 
 function getBaseUrl() {
   const pathParts = window.location.pathname.split('/');
-  // pathParts = ['', 'repo-name', 'admin.html']
-  const repoName = pathParts[1];
+  const repoName  = pathParts[1];
   return `${window.location.origin}/${repoName}`;
 }
 
-// ─── AUTH ────────────────────────────────────────────
+// ─── AUTH ─────────────────────────────────────────────
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -48,7 +47,7 @@ window.adminLogin = async () => {
   const errorEl  = document.getElementById('loginError');
 
   if (!email || !password) {
-    errorEl.textContent = 'Please enter email and password';
+    errorEl.textContent = '⚠️ Please enter email and password';
     return;
   }
 
@@ -58,7 +57,7 @@ window.adminLogin = async () => {
     errorEl.textContent = '';
   } catch (err) {
     console.error(err);
-    errorEl.textContent = 'Invalid email or password';
+    errorEl.textContent = '⚠️ Invalid email or password';
   }
 };
 
@@ -73,20 +72,20 @@ window.adminLogout = async () => {
 // ─── CREATE SESSION ───────────────────────────────────
 
 window.createSession = async () => {
-  const subject  = document.getElementById('subject').value.trim();
-  const date     = document.getElementById('date').value;
-  const timer    = parseInt(document.getElementById('timer').value);
+  const subject = document.getElementById('subject').value.trim();
+  const date    = document.getElementById('date').value;
+  const timer   = parseInt(document.getElementById('timer').value);
 
   if (!subject) {
-    alert('Please enter subject name');
+    alert('⚠️ Please enter subject name');
     return;
   }
   if (!date) {
-    alert('Please select a date');
+    alert('⚠️ Please select a date');
     return;
   }
   if (!timer || timer < 1) {
-    alert('Please enter a valid timer (minimum 1 minute)');
+    alert('⚠️ Please enter a valid timer (minimum 1 minute)');
     return;
   }
 
@@ -98,28 +97,26 @@ window.createSession = async () => {
       subject,
       date,
       timer,
-      endTime: Timestamp.fromDate(endTime),
-      isOpen: true,
+      endTime  : Timestamp.fromDate(endTime),
+      isOpen   : true,
       createdAt: serverTimestamp()
     });
 
     currentSessionId = sessionRef.id;
 
-    // ── Generate correct link with repo name ──
+    // Generate link
     const baseUrl = getBaseUrl();
-    const link = `${baseUrl}/index.html?session=${currentSessionId}`;
+    const link    = `${baseUrl}/index.html?session=${currentSessionId}`;
 
     document.getElementById('generatedLink').textContent = link;
     document.getElementById('linkCard').classList.remove('hidden');
     document.getElementById('closeBtn').disabled = false;
 
     // Start countdown
-    startCountdown(endTime, currentSessionId);
+    startCountdown(endTime);
 
     // Auto close when timer ends
-    setTimeout(() => {
-      closeSession();
-    }, timer * 60 * 1000);
+    setTimeout(() => closeSession(), timer * 60 * 1000);
 
     // Show live attendance
     listenAttendance(currentSessionId);
@@ -135,23 +132,22 @@ window.createSession = async () => {
 
 // ─── COUNTDOWN ────────────────────────────────────────
 
-function startCountdown(endTime, sessionId) {
+function startCountdown(endTime) {
   clearInterval(countdownInterval);
 
   countdownInterval = setInterval(() => {
-    const now  = new Date();
-    const diff = endTime - now;
+    const diff = endTime - new Date();
 
     if (diff <= 0) {
       clearInterval(countdownInterval);
-      document.getElementById('countdown').textContent = '⏰ Session Closed';
+      document.getElementById('countdown').textContent = '00:00';
       return;
     }
 
     const mins = Math.floor(diff / 60000);
     const secs = Math.floor((diff % 60000) / 1000);
     document.getElementById('countdown').textContent =
-      `⏱️ Closes in: ${mins}m ${secs}s`;
+      `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   }, 1000);
 }
 
@@ -166,10 +162,9 @@ window.closeSession = async () => {
     });
 
     clearInterval(countdownInterval);
-    document.getElementById('countdown').textContent = '⛔ Session Closed';
+    document.getElementById('countdown').textContent = '00:00';
     document.getElementById('closeBtn').disabled = true;
 
-    // Refresh past sessions list
     loadPastSessions();
 
   } catch (err) {
@@ -187,26 +182,50 @@ function listenAttendance(sessionId) {
   const q = query(attendanceRef, orderBy('submittedAt'));
 
   onSnapshot(q, (snapshot) => {
-    const list    = document.getElementById('attendanceList');
-    const info    = document.getElementById('sessionInfo');
+    const list       = document.getElementById('attendanceList');
+    const countBadge = document.getElementById('countBadge');
 
-    info.textContent = `Total Present: ${snapshot.size}`;
+    // Update count
+    countBadge.textContent = `${snapshot.size} present`;
+
+    // Clear list
     list.innerHTML = '';
 
-    snapshot.forEach((docSnap, index) => {
-      const data  = docSnap.data();
-      const div   = document.createElement('div');
-      div.className = 'student-item';
-
-      const time = data.submittedAt
-        ? data.submittedAt.toDate().toLocaleTimeString()
-        : '';
-
-      div.innerHTML = `
-        <span>${snapshot.docs.indexOf(docSnap) + 1}. ${data.name}</span>
-        <span style="color:#718096; font-size:0.85rem;">${time}</span>
+    // Empty state
+    if (snapshot.empty) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">⏳</div>
+          <p>Waiting for students...</p>
+        </div>
       `;
-      list.appendChild(div);
+      return;
+    }
+
+    // Add each student row
+    snapshot.docs.forEach((docSnap, index) => {
+      const data = docSnap.data();
+
+      let time = '';
+      try {
+        time = data.submittedAt
+          ? data.submittedAt.toDate().toLocaleTimeString([], {
+              hour  : '2-digit',
+              minute: '2-digit'
+            })
+          : '';
+      } catch (e) {
+        time = '';
+      }
+
+      const item = document.createElement('div');
+      item.className = 'student-item';
+      item.innerHTML = `
+        <div class="student-num">${index + 1}</div>
+        <div class="student-name">${data.name}</div>
+        <div class="student-time">${time}</div>
+      `;
+      list.appendChild(item);
     });
   });
 }
@@ -215,10 +234,10 @@ function listenAttendance(sessionId) {
 
 window.copyLink = () => {
   const link = document.getElementById('generatedLink').textContent;
+
   navigator.clipboard.writeText(link).then(() => {
     alert('✅ Link copied to clipboard!');
   }).catch(() => {
-    // Fallback for older browsers
     const el = document.createElement('textarea');
     el.value = link;
     document.body.appendChild(el);
@@ -233,7 +252,7 @@ window.copyLink = () => {
 
 window.copyAllNames = async () => {
   if (!currentSessionId) {
-    alert('No active session');
+    alert('No session selected');
     return;
   }
 
@@ -263,7 +282,7 @@ window.copyAllNames = async () => {
 
 window.downloadCSV = async () => {
   if (!currentSessionId) {
-    alert('No active session');
+    alert('No session selected');
     return;
   }
 
@@ -276,13 +295,8 @@ window.downloadCSV = async () => {
       return;
     }
 
-    // Get session info for filename
-    const sessionDoc = await getDocs(
-      query(collection(db, 'sessions'))
-    );
-
     let csv = 'No,Name,Submitted At\n';
-    snap.forEach((d, i) => {
+    snap.docs.forEach((d, i) => {
       const data = d.data();
       const time = data.submittedAt
         ? data.submittedAt.toDate().toLocaleString()
@@ -304,7 +318,7 @@ window.downloadCSV = async () => {
   }
 };
 
-// ─── PAST SESSIONS ────────────────────────────────────
+// ─── LOAD PAST SESSIONS ───────────────────────────────
 
 async function loadPastSessions() {
   try {
@@ -314,10 +328,16 @@ async function loadPastSessions() {
     );
     const snap = await getDocs(q);
     const div  = document.getElementById('pastSessions');
+
     div.innerHTML = '';
 
     if (snap.empty) {
-      div.innerHTML = '<p style="color:#718096;">No sessions yet</p>';
+      div.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <p>No sessions yet</p>
+        </div>
+      `;
       return;
     }
 
@@ -326,13 +346,17 @@ async function loadPastSessions() {
       const item = document.createElement('div');
       item.className = 'session-item';
       item.innerHTML = `
-        <span>
-          <strong>${data.subject}</strong> — ${data.date}
-        </span>
-        <span class="${data.isOpen ? 'open-badge' : 'closed-badge'}">
+        <div class="session-item-info">
+          <strong>${data.subject}</strong>
+          <span>${data.date}</span>
+        </div>
+        <span class="badge ${data.isOpen ? 'badge-open' : 'badge-closed'}">
           ${data.isOpen ? '🟢 Open' : '🔴 Closed'}
         </span>
-        <button onclick="viewSession('${d.id}')">👁 View</button>
+        <button class="btn btn-secondary btn-sm"
+          onclick="viewSession('${d.id}')">
+          👁 View
+        </button>
       `;
       div.appendChild(item);
     });
@@ -344,8 +368,31 @@ async function loadPastSessions() {
 
 // ─── VIEW PAST SESSION ────────────────────────────────
 
-window.viewSession = (sessionId) => {
+window.viewSession = async (sessionId) => {
   currentSessionId = sessionId;
+
+  try {
+    // Get session details
+    const sessionRef  = doc(db, 'sessions', sessionId);
+    const sessionSnap = await getDocs(collection(db, 'sessions'));
+
+    sessionSnap.forEach(d => {
+      if (d.id === sessionId) {
+        const data  = d.data();
+        const chips = document.getElementById('sessionInfoChips');
+        if (chips) {
+          chips.innerHTML = `
+            <div class="info-chip">📚 ${data.subject}</div>
+            <div class="info-chip">📅 ${data.date}</div>
+          `;
+        }
+      }
+    });
+
+  } catch (e) {
+    console.log(e);
+  }
+
   document.getElementById('attendanceCard').classList.remove('hidden');
   listenAttendance(sessionId);
   window.scrollTo({ top: 0, behavior: 'smooth' });

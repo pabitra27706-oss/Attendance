@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin — Attendance</title>
+  <title>Admin — AttendEase</title>
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
@@ -11,6 +11,7 @@
   <!-- ── LOGIN ── -->
   <div id="loginSection" class="container">
     <div class="card">
+
       <div class="app-header">
         <span class="app-logo">📋</span>
         <h1>AttendEase</h1>
@@ -19,19 +20,31 @@
 
       <div class="input-group">
         <label>Email</label>
-        <input type="email" id="adminEmail" placeholder="admin@example.com"/>
+        <input
+          type="email"
+          id="adminEmail"
+          placeholder="admin@example.com"
+        />
       </div>
 
       <div class="input-group">
         <label>Password</label>
-        <input type="password" id="adminPassword" placeholder="••••••••"
-          onkeydown="if(event.key==='Enter') adminLogin()"/>
+        <input
+          type="password"
+          id="adminPassword"
+          placeholder="••••••••"
+          onkeydown="if(event.key==='Enter') adminLogin()"
+        />
       </div>
 
       <button class="btn btn-primary" onclick="adminLogin()">
         🔐 Login to Dashboard
       </button>
-      <p id="loginError" class="error-text" style="justify-content:center;"></p>
+
+      <p id="loginError" class="error-text"
+        style="justify-content:center; margin-top:10px;">
+      </p>
+
     </div>
   </div>
 
@@ -40,22 +53,26 @@
 
     <!-- Top Bar -->
     <div class="top-bar">
-      <div>
+      <div style="display:flex; align-items:center; gap:8px;">
         <span style="font-size:1.5rem;">📋</span>
-        <strong style="font-size:1.1rem; margin-left:6px;">AttendEase</strong>
+        <strong style="font-size:1.1rem;">AttendEase</strong>
       </div>
       <button class="btn btn-secondary btn-sm" onclick="adminLogout()">
         🚪 Logout
       </button>
     </div>
 
-    <!-- Create Session -->
+    <!-- ── CREATE SESSION ── -->
     <div class="card">
       <h2>✨ New Session</h2>
 
       <div class="input-group">
         <label>Subject Name</label>
-        <input type="text" id="subject" placeholder="e.g. Mathematics"/>
+        <input
+          type="text"
+          id="subject"
+          placeholder="e.g. Mathematics"
+        />
       </div>
 
       <div class="input-group">
@@ -65,7 +82,13 @@
 
       <div class="input-group">
         <label>Close After (minutes)</label>
-        <input type="number" id="timer" placeholder="e.g. 10" min="1" max="120"/>
+        <input
+          type="number"
+          id="timer"
+          placeholder="e.g. 10"
+          min="1"
+          max="120"
+        />
       </div>
 
       <button class="btn btn-primary pulse" onclick="createSession()">
@@ -73,7 +96,7 @@
       </button>
     </div>
 
-    <!-- Generated Link -->
+    <!-- ── GENERATED LINK ── -->
     <div class="card hidden" id="linkCard">
       <h2>🔗 Share This Link</h2>
 
@@ -89,12 +112,15 @@
         <div class="timer-label">remaining</div>
       </div>
 
-      <button class="btn btn-danger" id="closeBtn" onclick="closeSession()">
+      <button
+        class="btn btn-danger"
+        id="closeBtn"
+        onclick="closeSession()">
         ⏹ Close Session Now
       </button>
     </div>
 
-    <!-- Attendance List -->
+    <!-- ── ATTENDANCE LIST ── -->
     <div class="card hidden" id="attendanceCard">
 
       <div class="attendance-header">
@@ -119,9 +145,10 @@
           ⬇️ Download CSV
         </button>
       </div>
+
     </div>
 
-    <!-- Past Sessions -->
+    <!-- ── PAST SESSIONS ── -->
     <div class="card">
       <h2>📂 Past Sessions</h2>
       <div id="pastSessions">
