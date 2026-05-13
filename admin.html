@@ -1,65 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin - Attendance</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Admin — Attendance</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-  <!-- LOGIN SECTION -->
+  <!-- ── LOGIN ── -->
   <div id="loginSection" class="container">
     <div class="card">
-      <h1>🔐 Admin Login</h1>
-      <input type="email" id="adminEmail" placeholder="Admin Email" />
-      <input type="password" id="adminPassword" placeholder="Password" />
-      <button onclick="adminLogin()">Login</button>
-      <p id="loginError" class="error"></p>
+      <div class="app-header">
+        <span class="app-logo">📋</span>
+        <h1>AttendEase</h1>
+        <p>Admin Portal</p>
+      </div>
+
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" id="adminEmail" placeholder="admin@example.com"/>
+      </div>
+
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="adminPassword" placeholder="••••••••"
+          onkeydown="if(event.key==='Enter') adminLogin()"/>
+      </div>
+
+      <button class="btn btn-primary" onclick="adminLogin()">
+        🔐 Login to Dashboard
+      </button>
+      <p id="loginError" class="error-text" style="justify-content:center;"></p>
     </div>
   </div>
 
-  <!-- ADMIN PANEL -->
+  <!-- ── ADMIN PANEL ── -->
   <div id="adminPanel" class="container hidden">
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div>
+        <span style="font-size:1.5rem;">📋</span>
+        <strong style="font-size:1.1rem; margin-left:6px;">AttendEase</strong>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="adminLogout()">
+        🚪 Logout
+      </button>
+    </div>
 
     <!-- Create Session -->
     <div class="card">
-      <h2>📝 Create Attendance Session</h2>
-      <input type="text" id="subject" placeholder="Subject Name" />
-      <input type="date" id="date" />
-      <label>Close After (minutes):</label>
-      <input type="number" id="timer" placeholder="e.g. 10" min="1" />
-      <button onclick="createSession()">🚀 Create & Get Link</button>
+      <h2>✨ New Session</h2>
+
+      <div class="input-group">
+        <label>Subject Name</label>
+        <input type="text" id="subject" placeholder="e.g. Mathematics"/>
+      </div>
+
+      <div class="input-group">
+        <label>Date</label>
+        <input type="date" id="date"/>
+      </div>
+
+      <div class="input-group">
+        <label>Close After (minutes)</label>
+        <input type="number" id="timer" placeholder="e.g. 10" min="1" max="120"/>
+      </div>
+
+      <button class="btn btn-primary pulse" onclick="createSession()">
+        🚀 Create Session & Get Link
+      </button>
     </div>
 
     <!-- Generated Link -->
     <div class="card hidden" id="linkCard">
       <h2>🔗 Share This Link</h2>
+
       <div class="link-box">
-        <p id="generatedLink"></p>
-        <button onclick="copyLink()">📋 Copy Link</button>
+        <span class="link-text" id="generatedLink"></span>
+        <button class="btn btn-primary btn-sm" onclick="copyLink()">
+          📋 Copy
+        </button>
       </div>
-      <div id="countdown" class="timer"></div>
-      <button onclick="closeSession()" id="closeBtn" class="red-btn">
-        ⏹ Close Now
+
+      <div class="timer-box">
+        <div class="timer-text" id="countdown">--:--</div>
+        <div class="timer-label">remaining</div>
+      </div>
+
+      <button class="btn btn-danger" id="closeBtn" onclick="closeSession()">
+        ⏹ Close Session Now
       </button>
     </div>
 
-    <!-- View Attendance -->
+    <!-- Attendance List -->
     <div class="card hidden" id="attendanceCard">
-      <h2>✅ Attendance List</h2>
-      <div id="sessionInfo" class="session-info"></div>
-      <div id="attendanceList"></div>
-      <div class="action-btns">
-        <button onclick="copyAllNames()">📋 Copy All Names</button>
-        <button onclick="downloadCSV()">⬇️ Download CSV</button>
+
+      <div class="attendance-header">
+        <h2 style="margin-bottom:0;">✅ Attendance</h2>
+        <span class="count-badge" id="countBadge">0 present</span>
+      </div>
+
+      <div id="sessionInfoChips" class="session-badge"></div>
+
+      <div class="student-list" id="attendanceList">
+        <div class="empty-state">
+          <div class="empty-icon">⏳</div>
+          <p>Waiting for students...</p>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="btn btn-secondary" onclick="copyAllNames()">
+          📋 Copy Names
+        </button>
+        <button class="btn btn-primary" onclick="downloadCSV()">
+          ⬇️ Download CSV
+        </button>
       </div>
     </div>
 
     <!-- Past Sessions -->
     <div class="card">
       <h2>📂 Past Sessions</h2>
-      <div id="pastSessions"></div>
+      <div id="pastSessions">
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <p>No sessions yet</p>
+        </div>
+      </div>
     </div>
 
   </div>
